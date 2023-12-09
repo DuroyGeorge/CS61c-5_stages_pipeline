@@ -2,49 +2,46 @@ module CPU (
     input wire clk
 );
     // Declare the signals
-    wire [31:0] inst;
-    wire [6:0] opcode;
-    wire [2:0] funct3;
-    wire [6:0] funct7;
-    wire jump;
-    wire immediate;
-    wire [4:0] rs1;
-    wire [4:0] rs2;
-    wire [4:0] rd;
-    wire [11:0] immediateValue_12;
-    wire [19:0] immediateValue_20;
-    wire load;
-    wire store;
-    wire [2:0] alusel;
-    wire [31:0] result;
-    wire [31:0] pc;
-    wire [31:0] readData1;
-    wire [31:0] readData2;
-    wire [31:0] memreadData;
-    reg branch;
-    reg [31:0] operand1;
-    reg [31:0] operand2;
-    reg [4:0] readReg1;
-    reg [4:0] readReg2;
-    reg [31:0] writeData;
-    reg [31:0] memaddress;
-    reg [31:0] memwriteData;
+    // wire [31:0] inst;
+    // wire [6:0] opcode;
+    // wire [2:0] funct3;
+    // wire [6:0] funct7;
+    // wire jump;
+    // wire immediate;
+    // wire [4:0] rs1;
+    // wire [4:0] rs2;
+    // wire [4:0] rd;
+    // wire [11:0] immediateValue_12;
+    // wire [19:0] immediateValue_20;
+    // wire load;
+    // wire store;
+    // wire [2:0] alusel;
+    // wire [31:0] result;
+    // wire [31:0] pc;
+    // wire [31:0] readData1;
+    // wire [31:0] readData2;
+    // wire [31:0] memreadData;
+    // reg branch;
+    // reg [31:0] operand1;
+    // reg [31:0] operand2;
+    // reg [4:0] readReg1;
+    // reg [4:0] readReg2;
+    // reg [31:0] writeData;
+    // reg [31:0] memaddress;
+    // reg [31:0] memwriteData;
 
     // Pipeline Registers
     reg [31:0] IF_ID_inst;
     reg [31:0] IF_ID_pc;
-    reg [6:0] IF_ID_opcode;
-    reg [2:0] IF_ID_funct3;
-    reg [6:0] IF_ID_funct7;
-    reg [4:0] IF_ID_rs1;
-    reg [4:0] IF_ID_rs2;
-    reg [4:0] IF_ID_rd;
-    reg [11:0] IF_ID_immediateValue_12;
-    reg [19:0] IF_ID_immediateValue_20;
+    reg [31:0] IF_ID_funct3;
+    reg [31:0] IF_ID_funct7;
 
     reg [31:0] ID_EX_inst;
     reg [31:0] ID_EX_pc ;
     reg [6:0] ID_EX_opcode;
+    reg [6:0] ID_EX_funct7;
+    reg [4:0] ID_EX_rs1;
+    reg [4:0] ID_EX_rs2;
     reg [4:0] ID_EX_rd;
     reg [11:0] ID_EX_immediateValue_12;
     reg [19:0] ID_EX_immediateValue_20;   
@@ -76,6 +73,7 @@ module CPU (
     reg MEM_WB_load;
     reg [31:0] MEM_WB_memreadData;
     reg [31:0] MEM_WB_result;
+    reg [31:0] MEM_WB_writedata;
 
     // Instruction Memory
     InstructionMemory instMem (
@@ -102,7 +100,7 @@ module CPU (
         .funct7(IF_ID_funct7),
         .rs1(IF_ID_rs1),
         .rs2(IF_ID_rs2),
-        .rd(IF_IF_rd)
+        .rd(IF_ID_rd)
         // Add other connections as needed
     );
     // ALU
@@ -120,7 +118,7 @@ module CPU (
         .writeEnable(MEM_WB_load),
         .readReg1(IF_ID_rs1),
         .readReg2(IF_ID_rs2),
-        .writeData(MEM_WB_load_writeData),
+        .writeData(MEM_WB_writedata),
         .readData1(ID_EX_readData1),
         .readData2(ID_EX_readData2)
         // Add other connections as needed
@@ -130,24 +128,24 @@ module CPU (
         .address(EX_MEM_memaddress),
         .writeData(EX_MEM_store),
         .memWrite(EX_MEM_memWrite),
-        .readData(EX_MEM_memreadData)
+        .readData(MEM_WB_memreadData)
     );
     // Control Unit
     ControlUnit ctrlUnit (
-        .instruction(inst),
-        .opcode(opcode),
-        .funct3(funct3),
-        .funct7(funct7),
-        .rs2(rs2),
-        .jump(jump),
-        .alusel(alusel),
-        .immediate(immedia
-        .rs1(rs1),
-        .rd(rd),
-        .load(load),
-        .store(store),te),
-        .immediateValue_12(immediateValue_12),
-        .immediateValue_20(immediateValue_20)
+        .instruction(IF_ID_inst),
+        .opcode(IF_ID_opcode),
+        .funct3(IF_ID_funct3),
+        .funct7(IF_ID_funct7),
+        .rs1(ID_EX_rs1),
+        .rs2(ID_EX_rs2),
+        .rd(ID_EX_rd),
+        .jump(ID_EX_jump),
+        .alusel(ID_EX_alusel),
+        .immediate(ID_EX_immediate),
+        .load(ID_EX_load),
+        .store(ID_EX_store),
+        .immediateValue_12(ID_EX_immediateValue_12),
+        .immediateValue_20(ID_EX_immediateValue_20)
         // Add other connections as needed
     );
     always @* begin
