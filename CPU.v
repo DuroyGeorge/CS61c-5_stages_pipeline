@@ -2,54 +2,101 @@ module CPU (
     input wire clk
 );
     // Pipeline wires
-    wire [31:0] IF_ID_inst;
     wire [31:0] pc;
-    wire [31:0] IF_ID_funct7;
-    wire [31:0] IF_ID_funct3;
-    wire [31:0] IF_ID_opcode;
+    wire [31:0] _ID_inst;
+    wire [31:0] _ID_funct7;
+    wire [31:0] _ID_funct3;
+    wire [31:0] _ID_opcode;
 
-    wire [31:0] ID_EX_inst;
-    wire [31:0] ID_EX_pc;
-    wire [6:0] ID_EX_opcode;
-    wire [6:0] ID_EX_funct3;
-    wire [6:0] ID_EX_funct7;
-    wire [4:0] ID_EX_rs1;
-    wire [4:0] ID_EX_rs2;
-    wire [4:0] ID_EX_rd;
-    wire [11:0] ID_EX_immediateValue_12;
-    wire [19:0] ID_EX_immediateValue_20;   
-    wire [4:0] ID_EX_operand1;
-    wire [4:0] ID_EX_operand2;
-    wire [2:0] ID_EX_alusel;
-    wire [31:0] ID_EX_readData1;
-    wire [31:0] ID_EX_readData2;
-    wire ID_EX_jump;
-    wire ID_EX_load;
-    wire ID_EX_store;
+    wire [31:0] _EX_inst;
+    wire [31:0] _EX_pc;
+    wire [6:0] _EX_opcode;
+    wire [6:0] _EX_funct3;
+    wire [6:0] _EX_funct7;
+    wire [4:0] _EX_rs1;
+    wire [4:0] _EX_rs2;
+    wire [4:0] _EX_rd;
+    wire [11:0] _EX_immediateValue_12;
+    wire [19:0] _EX_immediateValue_20;   
+    wire [4:0] _EX_operand1;
+    wire [4:0] _EX_operand2;
+    wire [2:0] _EX_alusel;
+    wire [31:0] _EX_readData1;
+    wire [31:0] _EX_readData2;
+    wire _EX_jump;
+    wire _EX_load;
+    wire _EX_store;
 
-    wire [31:0] EX_MEM_inst;
-    wire [31:0] EX_MEM_pc;
-    wire [6:0] EX_MEM_opcode;
-    wire [4:0] EX_MEM_rd;
-    wire EX_MEM_load;
-    wire EX_MEM_store;
-    wire EX_MEM_branch;
-    wire EX_MEM_jump;
-    wire [31:0] EX_MEM_memaddress;
-    wire [31:0] EX_MEM_readData1;
-    wire [31:0] EX_MEM_readData2;
-    wire [31:0] EX_MEM_result;
+    wire [31:0] _MEM_inst;
+    wire [31:0] _MEM_pc;
+    wire [6:0] _MEM_opcode;
+    wire [4:0] _MEM_rd;
+    wire _MEM_load;
+    wire _MEM_store;
+    wire _MEM_branch;
+    wire _MEM_jump;
+    wire [31:0] _MEM_memaddress;
+    wire [31:0] _MEM_readData1;
+    wire [31:0] _MEM_readData2;
+    wire [31:0] _MEM_result;
 
-    wire [31:0] MEM_WB_inst;
-    wire [31:0] MEM_WB_pc;
-    wire [6:0] MEM_WB_opcode;
-    wire [4:0] MEM_WB_rd;
-    wire MEM_WB_load;
-    wire MEM_WB_jump;
-    wire MEM_WB_branch;
-    wire [31:0] MEM_WB_memreadData;
-    wire [31:0] MEM_WB_result;
-    wire [31:0] MEM_WB_writedata;
+    wire [31:0] _WB_inst;
+    wire [31:0] _WB_pc;
+    wire [6:0] _WB_opcode;
+    wire [4:0] _WB_rd;
+    wire _WB_load;
+    wire _WB_jump;
+    wire _WB_branch;
+    wire [31:0] _WB_memreadData;
+    wire [31:0] _WB_result;
+
+    wire [31:0] inst_IF;
+    wire [31:0] pc_IF;
+    wire [31:0] funct7_IF;
+    wire [31:0] funct3_IF;
+    wire [31:0] opcode_IF;
+
+    wire [31:0] inst_ID;
+    wire [31:0] pc_ID;
+    wire [6:0] opcode_ID;
+    wire [6:0] funct3_ID;
+    wire [6:0] funct7_ID;
+    wire [4:0] rs1_ID;
+    wire [4:0] rs2_ID;
+    wire [4:0] rd_ID;
+    wire [11:0] immediateValue_12_ID;
+    wire [19:0] immediateValue_20_ID;   
+    wire [4:0] operand1_ID;
+    wire [4:0] operand2_ID;
+    wire [2:0] alusel_ID;
+    wire [31:0] readData1_ID;
+    wire [31:0] readData2_ID;
+    wire jump_ID;
+    wire load_ID;
+    wire store_ID;
+
+    wire [31:0] inst_EX;
+    wire [31:0] pc_EX;
+    wire [6:0] opcode_EX;
+    wire [4:0] rd_EX;
+    wire load_EX;
+    wire store_EX;
+    wire branch_EX;
+    wire jump_EX;
+    wire [31:0] memaddress_EX;
+    wire [31:0] readData1_EX;
+    wire [31:0] readData2_EX;
+    wire [31:0] result_EX;
+
+    wire [31:0] inst_MEM;
+    wire [31:0] pc_MEM;
+    wire [6:0] opcode_MEM;
+    wire [4:0] rd_MEM;
+    wire load_MEM;
+    wire jump_MEM;
+    wire branch_MEM;
+    wire [31:0] memreadData_MEM;
+    wire [31:0] result_MEM;
 
     //Pipeline Registers
     reg [31:0] ID_inst;
@@ -309,6 +356,7 @@ module CPU (
 
         //IF
         ID_inst<=IF_ID_inst;
+        ID_pc<=pc;
         ID_funct7<=IF_ID_funct7;
         ID_funct3<=IF_ID_funct3;
         ID_opcode<=IF_ID_opcode;
