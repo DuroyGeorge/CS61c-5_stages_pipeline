@@ -3,12 +3,13 @@ module CPU (
 );
     // Pipeline wires
     wire [31:0] IF_ID_inst;
-    wire [31:0] IF_ID_pc;
-    wire [31:0] IF_ID_funct3;
+    wire [31:0] pc;
     wire [31:0] IF_ID_funct7;
+    wire [31:0] IF_ID_funct3;
+    wire [31:0] IF_ID_opcode;
 
     wire [31:0] ID_EX_inst;
-    wire [31:0] ID_EX_pc ;
+    wire [31:0] ID_EX_pc;
     wire [6:0] ID_EX_opcode;
     wire [6:0] ID_EX_funct3;
     wire [6:0] ID_EX_funct7;
@@ -23,7 +24,6 @@ module CPU (
     wire [31:0] ID_EX_readData1;
     wire [31:0] ID_EX_readData2;
     wire ID_EX_jump;
-    wire ID_EX_immediate;
     wire ID_EX_load;
     wire ID_EX_store;
 
@@ -54,8 +54,9 @@ module CPU (
     //Pipeline Registers
     reg [31:0] ID_inst;
     reg [31:0] ID_pc;
-    reg [31:0] ID_funct3;
     reg [31:0] ID_funct7;
+    reg [31:0] ID_funct3;
+    reg [31:0] ID_opcode;
 
     reg [31:0] EX_inst;
     reg [31:0] EX_pc ;
@@ -100,9 +101,10 @@ module CPU (
     reg [31:0] WB_writedata;
 
     assign IF_ID_inst=ID_inst;
-    assign IF_ID_pc=ID_pc;
+    assign pc=ID_pc;
     assign IF_ID_funct3=ID_funct3;
     assign IF_ID_funct7=ID_funct7;
+    assign IF_ID_opcode=ID_opcode;
 
     assign ID_EX_inst=EX_inst;
     assign ID_EX_pc=EX_pc;
@@ -133,6 +135,7 @@ module CPU (
     assign EX_MEM_memaddress = MEM_result;
     assign EX_MEM_readData1 = MEM_readData1;
     assign EX_MEM_readData2 = MEM_readData2;
+    assign EX_MEM_result = MEM_result;
 
     assign MEM_WB_inst = WB_inst;
     assign MEM_WB_pc = WB_pc;
@@ -142,10 +145,11 @@ module CPU (
     assign MEM_WB_jump = WB_jump;
     assign MEM_WB_memreadData = WB_memreadData;
     assign MEM_WB_result = WB_result;
+    assign MEM_WB_branch = WB_branch;
 
     // Instruction Memory
     InstructionMemory instMem (
-        .address(IF_ID_pc),
+        .address(pc),
         .instruction(IF_ID_inst)
         // Add other connections as needed
     );
@@ -156,15 +160,15 @@ module CPU (
         .newpc(MEM_WB_pc),
         .branch(MEM_WB_branch),
         .jump(MEM_WB_jump),
-        .pc(IF_ID_pc)
+        .pc(pc)
         // Add other connections as needed
     );
     // Instruction Decoder
     InstructionDecoder instDecoder (
         .instruction(IF_ID_inst),
-        .opcode(IF_ID_opcode),
-        .funct3(IF_ID_funct3),
         .funct7(IF_ID_funct7),
+        .funct3(IF_ID_funct3),
+        .opcode(IF_ID_opcode),
         .rs1(ID_EX_rs1),
         .rs2(ID_EX_rs2),
         .rd(ID_EX_rd)
@@ -184,8 +188,8 @@ module CPU (
         .writeReg(MEM_WB_rd),
         .writeData(MEM_WB_writedata),
         .writeEnable(MEM_WB_load),
-        .readReg1(IF_ID_rs1),
-        .readReg2(IF_ID_rs2),
+        .readReg1(ID_EX_rs1),
+        .readReg2(ID_EX_rs2),
         .readData1(ID_EX_readData1),
         .readData2(ID_EX_readData2)
         // Add other connections as needed
@@ -216,8 +220,62 @@ module CPU (
         // Add other connections as needed
     );
 
+    initial begin
+        // Initialize ID stage registers
+        ID_inst = 32'b0;
+        ID_pc = 32'b0;
+        ID_funct7 = 32'b0;
+        ID_funct3 = 32'b0;
+        ID_opcode = 32'b0;
+
+        // Initialize EX stage registers
+        EX_inst = 32'b0;
+        EX_pc = 32'b0;
+        EX_funct3 = 7'b0;
+        EX_funct7 = 7'b0;
+        EX_opcode = 7'b0;
+        EX_rs1 = 5'b0;
+        EX_rs2 = 5'b0;
+        EX_rd = 5'b0;
+        EX_immediateValue_12 = 12'b0;
+        EX_immediateValue_20 = 20'b0;
+        EX_alusel = 3'b0;
+        EX_readData1 = 32'b0;
+        EX_readData2 = 32'b0;
+        EX_jump = 1'b0;
+        EX_immediate = 1'b0;
+        EX_load = 1'b0;
+        EX_store = 1'b0;
+
+        // Initialize MEM stage registers
+        MEM_inst = 32'b0;
+        MEM_pc = 32'b0;
+        MEM_opcode = 7'b0;
+        MEM_rd = 5'b0;
+        MEM_load = 1'b0;
+        MEM_store = 1'b0;
+        MEM_jump = 1'b0;
+        MEM_branch = 1'b0;
+        MEM_readData1 = 32'b0;
+        MEM_readData2 = 32'b0;
+        MEM_result = 32'b0;
+        MEM_writedata = 32'b0;
+
+        // Initialize WB stage registers
+        WB_inst = 32'b0;
+        WB_pc = 32'b0;
+        WB_opcode = 7'b0;
+        WB_rd = 5'b0;
+        WB_load = 1'b0;
+        WB_jump = 1'b0;
+        WB_branch = 1'b0;
+        WB_result = 32'b0;
+        WB_memreadData = 32'b0;
+        WB_writedata = 32'b0;
+    end
+
     assign ID_EX_operand1=(EX_opcode==7'b0110011||EX_opcode==7'b0010011||EX_opcode==7'b0000011||EX_opcode==7'b0100011)?EX_readData1:((EX_opcode==7'b1101111||EX_opcode==7'b1100011)?EX_pc:32'b0);
-    assign ID_EX_operand2=(EX_opcode==7'b0110011)?EX_readData2:((EX_opcode==7'b0000011||EX_opcode==7'b0100011||EX_opcode==7'b0010011||EX_opcode==7'b1100011)?$signed({20{EX_immediateValue_12[11]},EX_immediateValue_12}):((EX_opcode==7'b1101111)?$signed({12{EX_immediateValue_20[19]},EX_immediateValue_20}):32'b0));
+    assign ID_EX_operand2=(EX_opcode==7'b0110011)?EX_readData2:((EX_opcode==7'b0000011||EX_opcode==7'b0100011||EX_opcode==7'b0010011||EX_opcode==7'b1100011)?$signed({{20{EX_immediateValue_12[11]}},EX_immediateValue_12}):((EX_opcode==7'b1101111)?$signed({{12{EX_immediateValue_20[19]}},EX_immediateValue_20}):32'b0));
     assign MEM_WB_writedata=(WB_opcode==7'b0110011||WB_opcode==7'b0010011)?WB_result:((WB_opcode==7'b0000011)?WB_memreadData:((WB_opcode==7'b1101111)?WB_pc:32'b0));
 
     always @(posedge clk) begin
@@ -251,9 +309,9 @@ module CPU (
 
         //IF
         ID_inst<=IF_ID_inst;
-        ID_pc<=IF_ID_pc;
-        ID_funct3<=IF_ID_funct3;
         ID_funct7<=IF_ID_funct7;
+        ID_funct3<=IF_ID_funct3;
+        ID_opcode<=IF_ID_opcode;
 
         //ID
 
@@ -269,8 +327,8 @@ module CPU (
         EX_immediateValue_12<=ID_EX_immediateValue_12;
         EX_immediateValue_20<=ID_EX_immediateValue_20;
         EX_alusel<=ID_EX_alusel;
-        EX_readData1<=ID_EX_readData1;
-        EX_readData2<=ID_EX_readData2;
+        EX_readData1<=regFile.readData1;
+        EX_readData2<=regFile.readData2;
         EX_jump<=ID_EX_jump;
         EX_immediate<=ID_EX_immediate;
         EX_load<=ID_EX_load;

@@ -9,7 +9,6 @@ module ControlUnit (
     output reg load,
     output reg store,
     output reg jump,
-    output reg immediate,
     output reg [2:0] alusel,
     output reg [11:0] immediateValue_12,
     output reg [19:0] immediateValue_20
@@ -19,7 +18,6 @@ initial begin
     load=0;
     store=0;
     jump=0;
-    immediate=0; 
     immediateValue_12=12'bz;
     immediateValue_20=12'bz;
 end
@@ -28,7 +26,6 @@ end
         case (opcode) 
         7'b0110011: begin // R-type instructions
                jump = 0; 
-               immediate = 0;
                immediateValue_12=12'bz;immediateValue_20=20'bz;
                load=1;store=0;
                case(funct3)
@@ -66,7 +63,6 @@ end
             case (funct3)
                 3'b000: begin
                     jump = 0; 
-                    immediate = 1;
                     immediateValue_12 = {funct7[6:0], rs2[4:0]}; // addi
                     immediateValue_20=20'bz;
                     load=1;store=0;
@@ -76,24 +72,24 @@ end
                 // Add more I-type instructions as needed
                 // ...
                 default: begin
-                jump = 0; immediate = 0;immediateValue_12=12'bz;immediateValue_20=20'bz;load=0;store=0;
+                jump = 0; immediateValue_12=12'bz;immediateValue_20=20'bz;load=0;store=0;
                 end
             endcase
         end
         7'b0000011: begin // Load instructions
-            jump = 0; immediate = 1;
+            jump = 0; 
             immediateValue_12={funct7,rs2};immediateValue_20=20'bz; // lw
             load=1;store=0;
             alusel=3'bz;
         end
         7'b0100011: begin // Store instructions
-            jump = 0; immediate = 1;
+            jump = 0; 
             immediateValue_20={funct7,rd};immediateValue_12=12'bz; // sw
             store = 1;load=0;
             alusel=3'bz;
         end
         7'b1100011: begin // B-type instructions (Branch)
-            jump = 0; immediate = 1;
+            jump = 0; 
             immediateValue_12={instruction[31],instruction[7],instruction[30:25],instruction[11:8]};immediateValue_20=20'bz; // beq
             load=0;store=0;
             alusel=3'bz;
@@ -101,7 +97,7 @@ end
             // ...
         end
         7'b1101111: begin // J-type instructions (Jump)
-            jump = 1; immediate = 1;
+            jump = 1; 
             immediateValue_20={instruction[31],instruction[19:12],instruction[20],instruction[30:21]};immediateValue_12=12'bz; // j
             load=1;store=0;
             alusel=3'bz;
@@ -109,7 +105,7 @@ end
             // ...
         end
         default: begin // NOP instruction
-            jump = 0; immediate = 0;
+            jump = 0; 
             immediateValue_12=12'bz;immediateValue_20=20'bz;
             load=0;store=0;
             alusel=3'bz;
