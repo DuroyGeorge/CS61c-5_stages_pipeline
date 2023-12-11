@@ -99,8 +99,8 @@ module CPU (
     wire [31:0] result_MEM;
 
     //Pipeline Registers
-    reg [31:0] ID_inst;
     reg [31:0] ID_pc;
+    reg [31:0] ID_inst;
     reg [31:0] ID_funct7;
     reg [31:0] ID_funct3;
     reg [31:0] ID_opcode;
@@ -196,7 +196,7 @@ module CPU (
     // Instruction Memory
     InstructionMemory instMem (
         .address(pc),
-        .instruction(inst_ID)
+        .instruction(inst_IF)
         // Add other connections as needed
     );
 
@@ -211,7 +211,7 @@ module CPU (
     );
     // Instruction Decoder
     InstructionDecoder instDecoder (
-        .instruction(inst_ID),
+        .instruction(_ID_inst),
         .funct7(funct7_ID),
         .funct3(funct3_ID),
         .opcode(opcode_ID),
@@ -222,10 +222,10 @@ module CPU (
     );
     // Control Unit
     ControlUnit ctrlUnit (
-        .instruction(IF_ID_inst),
-        .opcode(IF_ID_opcode),
-        .funct3(IF_ID_funct3),
-        .funct7(IF_ID_funct7),
+        .instruction(_ID_inst),
+        .opcode(_ID_opcode),
+        .funct3(_ID_funct3),
+        .funct7(_ID_funct7),
         .rs1(_ID_rs1),
         .rs2(_ID_rs2),
         .rd(_ID_rd),
