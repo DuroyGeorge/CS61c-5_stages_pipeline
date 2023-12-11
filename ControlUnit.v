@@ -80,19 +80,19 @@ end
             jump = 0; 
             immediateValue_12={funct7,rs2};immediateValue_20=20'bz; // lw
             load=1;store=0;
-            alusel=3'bz;
+            alusel=3'b000;
         end
         7'b0100011: begin // Store instructions
             jump = 0; 
             immediateValue_20={funct7,rd};immediateValue_12=12'bz; // sw
             store = 1;load=0;
-            alusel=3'bz;
+            alusel=3'b000;
         end
         7'b1100011: begin // B-type instructions (Branch)
             jump = 0; 
             immediateValue_12={instruction[31],instruction[7],instruction[30:25],instruction[11:8]};immediateValue_20=20'bz; // beq
             load=0;store=0;
-            alusel=3'bz;
+            alusel=3'b000;
             // Add more B-type instructions as needed
             // ...
         end
@@ -100,7 +100,7 @@ end
             jump = 1; 
             immediateValue_20={instruction[31],instruction[19:12],instruction[20],instruction[30:21]};immediateValue_12=12'bz; // j
             load=1;store=0;
-            alusel=3'bz;
+            alusel=3'b000;
             // Add more J-type instructions as needed
             // ...
         end
