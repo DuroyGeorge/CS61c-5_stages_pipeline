@@ -4,15 +4,15 @@ module CPU (
     // Pipeline wires
     wire [31:0] pc;
     wire [31:0] _ID_inst;
-    wire [31:0] _ID_funct7;
-    wire [31:0] _ID_funct3;
-    wire [31:0] _ID_opcode;
+    wire [6:0] _ID_funct7;
+    wire [2:0] _ID_funct3;
+    wire [7:0] _ID_opcode;
     wire [4:0] _ID_rs1;
     wire [4:0] _ID_rs2;
     wire [4:0] _ID_rd;
 
-    wire [4:0] _EX_operand1;
-    wire [4:0] _EX_operand2;
+    wire [31:0] _EX_operand1;
+    wire [31:0] _EX_operand2;
     wire [2:0] _EX_alusel;
 
     wire _MEM_store;
@@ -29,9 +29,9 @@ module CPU (
 
     wire [31:0] inst_IF;
     wire [31:0] pc_IF;
-    wire [31:0] funct7_IF;
-    wire [31:0] funct3_IF;
-    wire [31:0] opcode_IF;
+    wire [6:0] funct7_IF;
+    wire [2:0] funct3_IF;
+    wire [6:0] opcode_IF;
     wire [4:0] rs1_IF;
     wire [4:0] rs2_IF;
     wire [4:0] rd_IF;
@@ -39,8 +39,6 @@ module CPU (
 
     wire [11:0] immediateValue_12_ID;
     wire [19:0] immediateValue_20_ID;   
-    wire [4:0] operand1_ID;
-    wire [4:0] operand2_ID;
     wire [2:0] alusel_ID;
     wire [31:0] readData1_ID;
     wire [31:0] readData2_ID;
@@ -55,12 +53,12 @@ module CPU (
     //Pipeline Registers
     reg [31:0] ID_pc;
     reg [31:0] ID_inst;
-    reg [31:0] ID_funct7;
+    reg [6:0] ID_funct7;
     reg [4:0] ID_rs2; 
     reg [4:0] ID_rs1;
-    reg [31:0] ID_funct3;
+    reg [2:0] ID_funct3;
     reg [4:0] ID_rd;
-    reg [31:0] ID_opcode;
+    reg [6:0] ID_opcode;
 
     reg [31:0] EX_inst;
     reg [31:0] EX_pc ;
@@ -74,7 +72,6 @@ module CPU (
     reg [31:0] EX_readData1;
     reg [31:0] EX_readData2;
     reg EX_jump;
-    reg EX_immediate;
     reg EX_load;
     reg EX_store;
 
@@ -201,7 +198,10 @@ module CPU (
         ID_inst = 32'b0;
         ID_pc = 32'b0;
         ID_funct7 = 32'b0;
+        ID_rs2 = 5'b0;
+        ID_rs1 = 5'b0;
         ID_funct3 = 32'b0;
+        ID_rd = 5'b0;
         ID_opcode = 32'b0;
 
         // Initialize EX stage registers
