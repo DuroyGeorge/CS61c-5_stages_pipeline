@@ -18,13 +18,12 @@ module CPU (
     wire _MEM_store;
     wire [31:0] _MEM_readData2;
     wire [31:0] _MEM_result;
+    wire _MEM_branch;
+    wire _MEM_jump;
 
-    wire [31:0] _WB_pc;
     wire [4:0] _WB_rd;
     wire [31:0] _WB_writedata;
     wire _WB_load;
-    wire _WB_jump;
-    wire _WB_branch;
     wire [31:0] _WB_result;
 
     wire [31:0] inst_IF;
@@ -91,12 +90,9 @@ module CPU (
     reg [31:0] MEM_writedata;
 
     reg [31:0] WB_inst;
-    reg [31:0] WB_pc;
     reg [6:0] WB_opcode;
     reg [4:0] WB_rd;
     reg WB_load;
-    reg WB_jump;
-    reg WB_branch;
     reg [31:0] WB_result;
     reg [31:0] WB_memreadData;
     reg [31:0] WB_writedata;
@@ -116,12 +112,11 @@ module CPU (
     assign _MEM_store = MEM_store;
     assign _MEM_readData2 = MEM_readData2;
     assign _MEM_result = MEM_result;
+    assign _MEM_branch=MEM_branch;
+    assign _MEM_jump=MEM_jump;
 
-    assign _WB_pc = WB_pc;
     assign _WB_rd = WB_rd;
     assign _WB_load = WB_load;
-    assign _WB_branch = WB_branch;
-    assign _WB_jump = WB_jump;
     assign _WB_result = WB_result;
 
     assign _nop=nop;
@@ -136,9 +131,9 @@ module CPU (
     // Program Counter (PC)
     PC pcUnit (
         .clk(clk),
-        .newpc(_WB_pc),
-        .branch(_WB_branch),
-        .jump(_WB_jump),
+        .newpc(_MEM_result),
+        .branch(_MEM_branch),
+        .jump(_MEM_jump),
         .nop(_nop),
         .pc(pc)
         // Add other connections as needed
@@ -247,12 +242,9 @@ module CPU (
 
         // Initialize WB stage registers
         WB_inst = 32'b0;
-        WB_pc = 32'b0;
         WB_opcode = 7'b0;
         WB_rd = 5'b0;
         WB_load = 1'b0;
-        WB_jump = 1'b0;
-        WB_branch = 1'b0;
         WB_result = 32'b0;
         WB_memreadData = 32'b0;
         WB_writedata = 32'b0;
@@ -292,8 +284,6 @@ module CPU (
         EX_jump<=jump_ID;
         EX_load<=load_ID;
         EX_store<=store_ID;
-        // EX_readData1<=regFile.readData1;
-        // EX_readData2<=regFile.readData2;
 
         //EX
         MEM_pc<=EX_pc;
@@ -307,7 +297,6 @@ module CPU (
         MEM_readData2<=EX_readData2;
 
         MEM_result<=alu.result;
-        MEM_pc<=alu.result;
         MEM_branch<=0;
 
         if(EX_opcode==7'b1100011 && EX_readData1==EX_readData2) begin
@@ -319,12 +308,8 @@ module CPU (
         //MEM
 
         WB_inst<=MEM_inst;
-        WB_pc<=MEM_pc;
         WB_opcode<=MEM_opcode;
         WB_rd<=MEM_rd;
-        // WB_load<=MEM_load;
-        WB_jump<=MEM_jump;
-        WB_branch<=MEM_branch;
         WB_result<=MEM_result;
         WB_writedata<=MEM_writedata;
 
