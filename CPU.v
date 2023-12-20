@@ -139,7 +139,7 @@ module CPU (
         .newpc(_WB_pc),
         .branch(_WB_branch),
         .jump(_WB_jump),
-        .nop(_nop)
+        .nop(_nop),
         .pc(pc)
         // Add other connections as needed
     );
@@ -336,11 +336,12 @@ module CPU (
         //register access
     always @(posedge clk)begin
         if(nop)begin
+            nop=0;
         end
         else begin
         WB_load=MEM_load;
         //forwarding
-        if(ID_opcode==7'0110011||ID_opcode==7'b1100011)begin//R B
+        if(ID_opcode==7'b0110011||ID_opcode==7'b1100011) begin//R B
             if(EX_rd==ID_rs1)begin
                 EX_readData1=alu.result;
             end
