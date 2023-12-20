@@ -10,15 +10,13 @@ initial begin
     pc = 32'b0;
 end
     always @(posedge clk) begin
-        if(nop) begin
+        if(nop)begin
         end
         else begin
-            // 默认情况下，递增 PC
             pc <= pc + 4;
-            // 跳转指令时，使用 jumpAddress 更新 PC
             if (jump||branch) begin
                 pc <= newpc;
             end;
         end
-        end
+    end
 endmodule

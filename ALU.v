@@ -2,14 +2,10 @@ module ALU (
     input wire [31:0] operand1,
     input wire [31:0] operand2,
     input wire [2:0] alusel,
-    input wire nop,
     output reg [31:0] result
 );
 
 always @* begin
-    if(nop)begin
-    end
-    else begin
     case (alusel)
         3'b000: result = operand1 + operand2; // ADD
         3'b010: result = operand1 - operand2; // SUB
@@ -22,6 +18,5 @@ always @* begin
         default: result = 32'b0;
     endcase
     end
-end
 
 endmodule

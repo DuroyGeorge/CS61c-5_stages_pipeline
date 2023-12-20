@@ -98,6 +98,7 @@ module CPU (
     reg [31:0] WB_writedata;
 
     reg nop;
+    reg stall;
 
     assign _ID_inst=ID_inst;
     assign _ID_funct7=ID_funct7;
@@ -121,6 +122,7 @@ module CPU (
 
     assign _nop=nop;
 
+
     // Instruction Memory
     InstructionMemory instMem (
         .address(pc),
@@ -134,8 +136,8 @@ module CPU (
         .newpc(_MEM_result),
         .branch(_MEM_branch),
         .jump(_MEM_jump),
-        .nop(_nop),
-        .pc(pc)
+        .pc(pc),
+        .nop(_nop)
         // Add other connections as needed
     );
     // Instruction Decoder
@@ -158,7 +160,6 @@ module CPU (
         .funct3(_ID_funct3),
         .rd(_ID_rd),
         .opcode(_ID_opcode),
-        .nop(_nop),
         .jump(jump_ID),
         .alusel(alusel_ID),
         .load(load_ID),
@@ -172,7 +173,6 @@ module CPU (
         .operand1(_EX_operand1),
         .operand2(_EX_operand2),
         .alusel(_EX_alusel),
-        .nop(_nop),
         .result(result_EX)
         // Add other connections as needed
     );
@@ -184,7 +184,6 @@ module CPU (
         .writeEnable(_WB_load),
         .readReg2(_ID_rs2),
         .readReg1(_ID_rs1),
-        .nop(_nop),
         .readData2(readData2_ID),
         .readData1(readData1_ID)
         // Add other connections as needed
@@ -194,7 +193,6 @@ module CPU (
         .address(_MEM_result),
         .writeData(_MEM_readData2),
         .memWrite(_MEM_store),
-        .nop(_nop),
         .readData(memreadData_MEM)
     );
 
@@ -250,6 +248,8 @@ module CPU (
         WB_writedata = 32'b0;
 
         nop=1'b0;
+        stall=1'b0;
+
     end
 
     assign _EX_operand1=(EX_opcode==7'b0110011||EX_opcode==7'b0010011||EX_opcode==7'b0000011||EX_opcode==7'b0100011)?EX_readData1:((EX_opcode==7'b1101111||EX_opcode==7'b1100011)?EX_pc:32'b0);
@@ -258,9 +258,10 @@ module CPU (
 
     always @(posedge clk) begin
         if(nop)begin
+            nop<=0;
         end
-        else begin
         //IF
+        if(!stall)begin
         ID_pc<=pc;
         ID_inst<=inst_IF;
         ID_funct7<=funct7_IF;
@@ -269,6 +270,10 @@ module CPU (
         ID_funct3<=funct3_IF;
         ID_rd<=rd_IF;
         ID_opcode<=opcode_IF;
+        end
+        else begin
+            stall=0;
+        end
 
         //ID
 
@@ -317,13 +322,8 @@ module CPU (
         
         //WB
         end
-    end
         //register access
     always @(posedge clk)begin
-        if(nop)begin
-            nop=0;
-        end
-        else begin
         WB_load=MEM_load;
         //forwarding
         if(ID_opcode==7'b0110011||ID_opcode==7'b1100011) begin//R B
@@ -339,8 +339,21 @@ module CPU (
             if(MEM_opcode==7'b0000011&&MEM_rd==ID_rs2)begin
                 EX_readData2=memunit.readData;
             end
-            if(MEM_opcode==7'b0000011&&MEM_rd==EX_rs1||MEM_rd==EX_rs2)begin
-                nop=1;
+            if(EX_opcode==7'b0000011&&(EX_rd==ID_rs1||EX_rd==ID_rs2))begin
+                EX_pc<=0;
+                EX_inst<=0;
+                EX_rs2<=0;
+                EX_rs1<=0;
+                EX_opcode<=0;
+                EX_rd<=0;
+                EX_immediateValue_12<=0;
+                EX_immediateValue_20<=0;
+                EX_alusel<=0;
+                EX_jump<=0;
+                EX_load<=0;
+                EX_store<=0;
+                nop<=1;
+                stall=1;
             end
             EX_readData1=regFile.readData1;
             EX_readData2=regFile.readData2;
@@ -352,8 +365,21 @@ module CPU (
             if(MEM_opcode==7'b0000011&&MEM_rd==ID_rs1)begin
                 EX_readData1=memunit.readData;
             end
-            if(MEM_opcode==7'b0000011&&MEM_rd==EX_rs1)begin
-                nop=1;
+            if(EX_opcode==7'b0000011&&EX_rd==EX_rs1)begin
+                EX_pc<=0;
+                EX_inst<=0;
+                EX_rs2<=0;
+                EX_rs1<=0;
+                EX_opcode<=0;
+                EX_rd<=0;
+                EX_immediateValue_12<=0;
+                EX_immediateValue_20<=0;
+                EX_alusel<=0;
+                EX_jump<=0;
+                EX_load<=0;
+                EX_store<=0;
+                nop<=1;
+                stall=1;
             end
             EX_readData1=regFile.readData1;
             EX_readData2=regFile.readData2;
@@ -362,6 +388,5 @@ module CPU (
             EX_readData1=regFile.readData1;
             EX_readData2=regFile.readData2;
         end
-    end
     end
 endmodule

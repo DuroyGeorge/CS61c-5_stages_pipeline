@@ -5,7 +5,6 @@ module RegisterFile(
     input wire [4:0] readReg1,
     input wire [4:0] readReg2,
     input wire [31:0] writeData,
-    input wire nop,
     output wire [31:0] readData1,
     output wire [31:0] readData2
 );
@@ -21,14 +20,9 @@ module RegisterFile(
     assign readData2 = registers[readReg2];
 
     always @(posedge clk) begin
-        if(nop)begin
-        end
-        else begin
-            // Write data to registers when writeEnable is asserted
-            if (writeEnable) begin
-                registers[writeReg] <= writeData;
-            end
+        // Write data to registers when writeEnable is asserted
+        if (writeEnable) begin
+            registers[writeReg] <= writeData;
         end
     end
-
 endmodule
