@@ -290,14 +290,13 @@ module CPU (
         MEM_readData2<=EX_readData2;
 
         MEM_result<=alu.result;
+        MEM_pc<=alu.result;
         MEM_branch<=0;
 
         if(EX_opcode==7'b1100011 && EX_readData1==EX_readData2) begin
             MEM_branch<=1;
-            MEM_pc<=alu.result;
         end
         if(EX_opcode==7'b1101111)begin
-            MEM_pc<=alu.result;
             MEM_writedata<=EX_pc+4;
         end
         //MEM
