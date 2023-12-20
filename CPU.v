@@ -354,7 +354,7 @@ module CPU (
                 EX_readData2=memunit.readData;
             end
             if(MEM_opcode==7'b0000011&&MEM_rd==EX_rs1||MEM_rd==EX_rs2)begin
-                nop;
+                nop=1;
             end
             EX_readData1=regFile.readData1;
             EX_readData2=regFile.readData2;
@@ -367,7 +367,7 @@ module CPU (
                 EX_readData1=memunit.readData;
             end
             if(MEM_opcode==7'b0000011&&MEM_rd==EX_rs1)begin
-                nop;
+                nop=1;
             end
             EX_readData1=regFile.readData1;
             EX_readData2=regFile.readData2;
