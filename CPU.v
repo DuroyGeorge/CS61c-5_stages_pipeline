@@ -265,7 +265,9 @@ module CPU (
     assign _WB_writedata=(WB_opcode==7'b0110011||WB_opcode==7'b0010011)?WB_result:((WB_opcode==7'b0000011)?WB_memreadData:((WB_opcode==7'b1101111)?WB_writedata:32'b0));
 
     always @(posedge clk) begin
-
+        if(nop)begin
+        end
+        else begin
         //IF
         ID_pc<=pc;
         ID_inst<=inst_IF;
@@ -329,10 +331,13 @@ module CPU (
         WB_memreadData<=memunit.readData;
         
         //WB
-
+        end
     end
         //register access
     always @(posedge clk)begin
+        if(nop)begin
+        end
+        else begin
         WB_load=MEM_load;
         //forwarding
         if(ID_opcode==7'0110011||ID_opcode==7'b1100011)begin//R B
@@ -371,5 +376,6 @@ module CPU (
             EX_readData1=regFile.readData1;
             EX_readData2=regFile.readData2;
         end
+    end
     end
 endmodule
