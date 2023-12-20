@@ -3,6 +3,7 @@ module MemoryUnit (
     input wire [31:0] address,
     input wire [31:0] writeData,
     input wire memWrite, // Signal indicating a memory write operation
+    input wire nop,
     output wire [31:0] readData
 );
 
@@ -16,6 +17,9 @@ module MemoryUnit (
     end
     assign readData = {memory[address+3],memory[address+2],memory[address+1],memory[address]};
     always @(posedge clk) begin
+        if(nop)begin
+        end
+        else begin
             // Memory write operation
             if (memWrite) begin
                 memory[address] <= writeData[7:0];
@@ -23,6 +27,7 @@ module MemoryUnit (
                 memory[address+2]<=writeData[23:16];
                 memory[address+3]<=writeData[31:24];
             end
+        end
     end
 
 endmodule

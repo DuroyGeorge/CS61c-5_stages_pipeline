@@ -6,6 +6,7 @@ module ControlUnit (
     input wire [4:0] rs2,
     input wire [4:0] rs1,
     input wire [4:0] rd,
+    input wire nop,
     output reg load,
     output reg store,
     output reg jump,
@@ -23,6 +24,9 @@ initial begin
 end
     // ALU operation mapping
     always @* begin
+        if(nop)begin
+        end
+        else begin
         case (opcode) 
         7'b0110011: begin // R-type instructions
                jump = 0; 
@@ -111,5 +115,6 @@ end
             alusel=3'b0;
         end
     endcase
+        end
     end
 endmodule

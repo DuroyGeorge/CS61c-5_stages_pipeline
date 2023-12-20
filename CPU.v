@@ -50,6 +50,8 @@ module CPU (
 
     wire [31:0] memreadData_MEM;
 
+    wire _nop;
+
     //Pipeline Registers
     reg [31:0] ID_pc;
     reg [31:0] ID_inst;
@@ -99,6 +101,8 @@ module CPU (
     reg [31:0] WB_memreadData;
     reg [31:0] WB_writedata;
 
+    reg nop;
+
     assign _ID_inst=ID_inst;
     assign _ID_funct7=ID_funct7;
     assign _ID_rs2=ID_rs2;
@@ -120,6 +124,8 @@ module CPU (
     assign _WB_jump = WB_jump;
     assign _WB_result = WB_result;
 
+    assign _nop=nop;
+
     // Instruction Memory
     InstructionMemory instMem (
         .address(pc),
@@ -133,6 +139,7 @@ module CPU (
         .newpc(_WB_pc),
         .branch(_WB_branch),
         .jump(_WB_jump),
+        .nop(_nop)
         .pc(pc)
         // Add other connections as needed
     );
@@ -156,6 +163,7 @@ module CPU (
         .funct3(_ID_funct3),
         .rd(_ID_rd),
         .opcode(_ID_opcode),
+        .nop(_nop),
         .jump(jump_ID),
         .alusel(alusel_ID),
         .load(load_ID),
@@ -169,6 +177,7 @@ module CPU (
         .operand1(_EX_operand1),
         .operand2(_EX_operand2),
         .alusel(_EX_alusel),
+        .nop(_nop),
         .result(result_EX)
         // Add other connections as needed
     );
@@ -180,6 +189,7 @@ module CPU (
         .writeEnable(_WB_load),
         .readReg2(_ID_rs2),
         .readReg1(_ID_rs1),
+        .nop(_nop),
         .readData2(readData2_ID),
         .readData1(readData1_ID)
         // Add other connections as needed
@@ -189,6 +199,7 @@ module CPU (
         .address(_MEM_result),
         .writeData(_MEM_readData2),
         .memWrite(_MEM_store),
+        .nop(_nop),
         .readData(memreadData_MEM)
     );
 
@@ -245,6 +256,8 @@ module CPU (
         WB_result = 32'b0;
         WB_memreadData = 32'b0;
         WB_writedata = 32'b0;
+
+        nop=1'b0;
     end
 
     assign _EX_operand1=(EX_opcode==7'b0110011||EX_opcode==7'b0010011||EX_opcode==7'b0000011||EX_opcode==7'b0100011)?EX_readData1:((EX_opcode==7'b1101111||EX_opcode==7'b1100011)?EX_pc:32'b0);
@@ -267,6 +280,8 @@ module CPU (
 
         EX_pc<=ID_pc;
         EX_inst<=ID_inst;
+        EX_rs2<=ID_rs2;
+        EX_rs1<=ID_rs1;
         EX_opcode<=ID_opcode;
         EX_rd<=ID_rd;
         EX_immediateValue_12<=immediateValue_12_ID;
@@ -275,8 +290,8 @@ module CPU (
         EX_jump<=jump_ID;
         EX_load<=load_ID;
         EX_store<=store_ID;
-        EX_readData1<=regFile.readData1;
-        EX_readData2<=regFile.readData2;
+        // EX_readData1<=regFile.readData1;
+        // EX_readData2<=regFile.readData2;
 
         //EX
         MEM_pc<=EX_pc;
@@ -305,15 +320,56 @@ module CPU (
         WB_pc<=MEM_pc;
         WB_opcode<=MEM_opcode;
         WB_rd<=MEM_rd;
-        WB_load<=MEM_load;
+        // WB_load<=MEM_load;
         WB_jump<=MEM_jump;
         WB_branch<=MEM_branch;
         WB_result<=MEM_result;
         WB_writedata<=MEM_writedata;
 
         WB_memreadData<=memunit.readData;
-
+        
         //WB
 
+    end
+        //register access
+    always @(posedge clk)begin
+        WB_load=MEM_load;
+        //forwarding
+        if(ID_opcode==7'0110011||ID_opcode==7'b1100011)begin//R B
+            if(EX_rd==ID_rs1)begin
+                EX_readData1=alu.result;
+            end
+            if(EX_rd==ID_rs2)begin
+                EX_readData2=alu.result;
+            end
+            if(MEM_opcode==7'b0000011&&MEM_rd==ID_rs1)begin
+                EX_readData1=memunit.readData;
+            end
+            if(MEM_opcode==7'b0000011&&MEM_rd==ID_rs2)begin
+                EX_readData2=memunit.readData;
+            end
+            if(MEM_opcode==7'b0000011&&MEM_rd==EX_rs1||MEM_rd==EX_rs2)begin
+                nop;
+            end
+            EX_readData1=regFile.readData1;
+            EX_readData2=regFile.readData2;
+        end
+        else if(ID_opcode==7'b0010011)begin//I
+            if(EX_rd==ID_rs1)begin
+                EX_readData1=alu.result;
+            end
+            if(MEM_opcode==7'b0000011&&MEM_rd==ID_rs1)begin
+                EX_readData1=memunit.readData;
+            end
+            if(MEM_opcode==7'b0000011&&MEM_rd==EX_rs1)begin
+                nop;
+            end
+            EX_readData1=regFile.readData1;
+            EX_readData2=regFile.readData2;
+        end
+        else begin
+            EX_readData1=regFile.readData1;
+            EX_readData2=regFile.readData2;
+        end
     end
 endmodule
