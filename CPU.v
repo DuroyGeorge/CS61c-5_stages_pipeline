@@ -364,21 +364,61 @@ module CPU (
         MEM_rd<=EX_rd;
         MEM_load<=EX_load;
         MEM_store<=EX_store;
-        MEM_jump<=EX_jump;
         MEM_readData1<=EX_readData1;
         MEM_readData2<=EX_readData2;
+        MEM_jump=EX_jump;
 
+        MEM_branch=0;
         MEM_result<=alu.result;
-        MEM_branch<=0;
 
         if(EX_opcode==7'b1100011 && EX_readData1==EX_readData2) begin
-            MEM_branch<=1;
+            MEM_branch=1;
         end
         if(EX_opcode==7'b1101111)begin
             MEM_writedata<=EX_pc+4;
         end
 
         //MEM
+
+        //conditional branch
+        if(MEM_branch||MEM_jump)begin
+                MEM_pc<=0;
+                MEM_inst<=0;
+                MEM_rd<=0;
+                MEM_opcode<=0;
+                MEM_load<=0;
+                MEM_store<=0;
+                MEM_jump<=0;
+                MEM_readData1<=0;
+                MEM_readData2<=0;
+                MEM_result<=0;
+                MEM_writedata<=0;
+                MEM_branch<=0; 
+
+                EX_pc<=0;
+                EX_inst<=0;
+                EX_rs2<=0;
+                EX_rs1<=0;
+                EX_opcode<=0;
+                EX_rd<=0;
+                EX_immediateValue_12<=0;
+                EX_immediateValue_20<=0;
+                EX_alusel<=0;
+                EX_jump<=0;
+                EX_load<=0;
+                EX_store<=0;
+
+                ID_pc<=0;
+                ID_inst<=0;
+                ID_funct7<=0;
+                ID_rs2<=0;
+                ID_rs1<=0;
+                ID_funct3<=0;
+                ID_rd<=0;
+                ID_opcode<=0;
+
+        end
+
         WB_inst<=MEM_inst;
         WB_opcode<=MEM_opcode;
         WB_rd<=MEM_rd;
@@ -387,6 +427,7 @@ module CPU (
 
         WB_memreadData<=memunit.readData;
         
+
         //WB
         
     end
