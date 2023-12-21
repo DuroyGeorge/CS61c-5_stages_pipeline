@@ -2,7 +2,7 @@ module CPU (
     input wire clk
 );
     // Pipeline wires
-    wire [31:0] pc;
+    wire [31:0] _ID_pc;
     wire [31:0] _ID_inst;
     wire [6:0] _ID_funct7;
     wire [2:0] _ID_funct3;
@@ -100,6 +100,7 @@ module CPU (
     reg nop;
     reg stall;
 
+    assign _ID_pc=ID_pc;
     assign _ID_inst=ID_inst;
     assign _ID_funct7=ID_funct7;
     assign _ID_rs2=ID_rs2;
@@ -125,7 +126,7 @@ module CPU (
 
     // Instruction Memory
     InstructionMemory instMem (
-        .address(pc),
+        .address(pc_IF),
         .instruction(inst_IF)
         // Add other connections as needed
     );
@@ -133,11 +134,11 @@ module CPU (
     // Program Counter (PC)
     PC pcUnit (
         .clk(clk),
+        .nop(_nop),
         .newpc(_MEM_result),
         .branch(_MEM_branch),
         .jump(_MEM_jump),
-        .pc(pc),
-        .nop(_nop)
+        .pc(pc_IF)
         // Add other connections as needed
     );
     // Instruction Decoder
@@ -332,7 +333,7 @@ module CPU (
             stall=0;
         end
         else begin
-            ID_pc<=pc;
+            ID_pc<=pc_IF;
             ID_inst<=inst_IF;
             ID_funct7<=funct7_IF;
             ID_rs2<=rs2_IF;
