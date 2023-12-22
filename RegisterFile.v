@@ -22,7 +22,7 @@ module RegisterFile(
     always @(posedge clk) begin
         // Write data to registers when writeEnable is asserted
         if (writeEnable) begin
-            registers[writeReg] <= writeData;
+            registers[writeReg] = writeData;
         end
     end
 endmodule

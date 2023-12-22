@@ -17,9 +17,6 @@ module MemoryUnit (
     end
     assign readData = {memory[address+3],memory[address+2],memory[address+1],memory[address]};
     always @(posedge clk) begin
-        if(nop)begin
-        end
-        else begin
             // Memory write operation
             if (memWrite) begin
                 memory[address] <= writeData[7:0];
@@ -28,6 +25,5 @@ module MemoryUnit (
                 memory[address+3]<=writeData[31:24];
             end
         end
-    end
 
 endmodule

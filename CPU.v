@@ -6,7 +6,7 @@ module CPU (
     wire [31:0] _ID_inst;
     wire [6:0] _ID_funct7;
     wire [2:0] _ID_funct3;
-    wire [7:0] _ID_opcode;
+    wire [6:0] _ID_opcode;
     wire [4:0] _ID_rs1;
     wire [4:0] _ID_rs2;
     wire [4:0] _ID_rd;
@@ -123,15 +123,11 @@ module CPU (
 
     assign _nop=nop;
 
-
-    // Instruction Memory
     InstructionMemory instMem (
         .address(pc_IF),
         .instruction(inst_IF)
-        // Add other connections as needed
     );
 
-    // Program Counter (PC)
     PC pcUnit (
         .clk(clk),
         .nop(_nop),
@@ -139,9 +135,8 @@ module CPU (
         .branch(_MEM_branch),
         .jump(_MEM_jump),
         .pc(pc_IF)
-        // Add other connections as needed
     );
-    // Instruction Decoder
+
     InstructionDecoder instDecoder (
         .instruction(inst_IF),
         .funct7(funct7_IF),
@@ -150,9 +145,8 @@ module CPU (
         .funct3(funct3_IF),
         .rd(rd_IF),
         .opcode(opcode_IF)
-        // Add other connections as needed
     );
-    // Control Unit
+
     ControlUnit ctrlUnit (
         .instruction(_ID_inst),
         .funct7(_ID_funct7),
@@ -167,17 +161,15 @@ module CPU (
         .store(store_ID),
         .immediateValue_12(immediateValue_12_ID),
         .immediateValue_20(immediateValue_20_ID)
-        // Add other connections as needed
     );
-    // ALU
+
     ALU alu (
         .operand1(_EX_operand1),
         .operand2(_EX_operand2),
         .alusel(_EX_alusel),
         .result(result_EX)
-        // Add other connections as needed
     );
-    // Register File
+
     RegisterFile regFile (
         .clk(clk),
         .writeReg(_WB_rd),
@@ -187,8 +179,8 @@ module CPU (
         .readReg1(_ID_rs1),
         .readData2(readData2_ID),
         .readData1(readData1_ID)
-        // Add other connections as needed
     );
+
     MemoryUnit memunit(
         .clk(clk),
         .address(_MEM_result),
@@ -264,84 +256,23 @@ module CPU (
 
         //register access
         WB_load=MEM_load;
-        //forwarding
-        if(ID_opcode==7'b0110011||ID_opcode==7'b1100011) begin//R B
-            if(EX_rd==ID_rs1)begin
-                EX_readData1=alu.result;
-            end
-            if(EX_rd==ID_rs2)begin
-                EX_readData2=alu.result;
-            end
-            if(MEM_opcode==7'b0000011&&MEM_rd==ID_rs1)begin
-                EX_readData1=memunit.readData;
-            end
-            if(MEM_opcode==7'b0000011&&MEM_rd==ID_rs2)begin
-                EX_readData2=memunit.readData;
-            end
-            if(EX_opcode==7'b0000011&&(EX_rd==ID_rs1||EX_rd==ID_rs2))begin
-                EX_pc<=0;
-                EX_inst<=0;
-                EX_rs2<=0;
-                EX_rs1<=0;
-                EX_opcode<=0;
-                EX_rd<=0;
-                EX_immediateValue_12<=0;
-                EX_immediateValue_20<=0;
-                EX_alusel<=0;
-                EX_jump<=0;
-                EX_load<=0;
-                EX_store<=0;
-                nop<=1;
-                stall=1;
-            end
-            EX_readData1=regFile.readData1;
-            EX_readData2=regFile.readData2;
-        end
-        else if(ID_opcode==7'b0010011)begin//I
-            if(EX_rd==ID_rs1)begin
-                EX_readData1=alu.result;
-            end
-            if(MEM_opcode==7'b0000011&&MEM_rd==ID_rs1)begin
-                EX_readData1=memunit.readData;
-            end
-            if(EX_opcode==7'b0000011&&EX_rd==EX_rs1)begin
-                EX_pc<=0;
-                EX_inst<=0;
-                EX_rs2<=0;
-                EX_rs1<=0;
-                EX_opcode<=0;
-                EX_rd<=0;
-                EX_immediateValue_12<=0;
-                EX_immediateValue_20<=0;
-                EX_alusel<=0;
-                EX_jump<=0;
-                EX_load<=0;
-                EX_store<=0;
-                nop<=1;
-                stall=1;
-            end
-            EX_readData1=regFile.readData1;
-            EX_readData2=regFile.readData2;
-        end
-        else begin
-            EX_readData1=regFile.readData1;
-            EX_readData2=regFile.readData2;
-        end
-
+        EX_readData1<=regFile.readData1;
+        EX_readData2<=regFile.readData2;
+        
         //IF
-        if(stall)begin
-            stall=0;
-        end
-        else begin
-            ID_pc<=pc_IF;
-            ID_inst<=inst_IF;
-            ID_funct7<=funct7_IF;
-            ID_rs2<=rs2_IF;
-            ID_rs1<=rs1_IF;
-            ID_funct3<=funct3_IF;
-            ID_rd<=rd_IF;
-            ID_opcode<=opcode_IF;
-        end
+        // if(stall)begin
+        //     stall<=0;
+        // end
+        // else begin
+        ID_pc<=pc_IF;
+        ID_inst<=inst_IF;
+        ID_funct7<=funct7_IF;
+        ID_rs2<=rs2_IF;
+        ID_rs1<=rs1_IF;
+        ID_funct3<=funct3_IF;
+        ID_rd<=rd_IF;
+        ID_opcode<=opcode_IF;
+        // end
 
         //ID
         EX_pc<=ID_pc;
@@ -356,6 +287,71 @@ module CPU (
         EX_jump<=jump_ID;
         EX_load<=load_ID;
         EX_store<=store_ID;
+
+        //forwarding
+        if(ID_opcode==7'b0110011||ID_opcode==7'b1100011) begin//R B
+            if(EX_rd==ID_rs1)begin
+                EX_readData1<=alu.result;
+            end
+            if(EX_rd==ID_rs2)begin
+                EX_readData2<=alu.result;
+            end
+            if(MEM_opcode==7'b0000011&&MEM_rd==ID_rs1)begin
+                EX_readData1<=memunit.readData;
+            end
+            if(MEM_opcode==7'b0000011&&MEM_rd==ID_rs2)begin
+                EX_readData2<=memunit.readData;
+            end
+            if(ID_opcode==7'b0000011&&(ID_rd==rs1_IF||ID_rd==rs2_IF))begin
+                ID_pc<=0;
+                ID_inst<=0;
+                ID_funct7<=0;
+                ID_rs2<=0;
+                ID_rs1<=0;
+                ID_funct3<=0;
+                ID_rd<=0;
+                ID_opcode<=0;
+                nop=1;
+                // stall=1;
+            end
+        end
+        else if(ID_opcode==7'b0010011||ID_opcode==7'b0000011)begin//I load
+            if(EX_rd==ID_rs1)begin
+                EX_readData1<=alu.result;
+            end
+            if(MEM_opcode==7'b0000011&&MEM_rd==ID_rs1)begin
+                EX_readData1<=memunit.readData;
+            end
+            if(ID_opcode==7'b0000011&&ID_rd==rs1_IF)begin
+                ID_pc<=0;
+                ID_inst<=0;
+                ID_funct7<=0;
+                ID_rs2<=0;
+                ID_rs1<=0;
+                ID_funct3<=0;
+                ID_rd<=0;
+                ID_opcode<=0;
+                nop<=1;
+                // stall=1;               
+
+                // EX_pc<=0;
+                // EX_inst<=0;
+                // EX_rs2<=0;
+                // EX_rs1<=0;
+                // EX_opcode<=0;
+                // EX_rd<=0;
+                // EX_immediateValue_12<=0;
+                // EX_immediateValue_20<=0;
+                // EX_alusel<=0;
+                // EX_jump<=0;
+                // EX_load<=0;
+                // EX_store<=0;
+                // EX_readData1<=0;
+                // EX_readData2<=0;
+                // nop=1;
+                // stall=1;
+            end
+        end
 
 
         //EX
@@ -428,7 +424,6 @@ module CPU (
 
         WB_memreadData<=memunit.readData;
         
-
         //WB
         
     end

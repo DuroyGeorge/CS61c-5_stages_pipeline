@@ -10,13 +10,12 @@ initial begin
     pc = 32'b0;
 end
     always @(posedge clk) begin
-        if(nop)begin
-        end
-        else begin
-            pc <= pc + 4;
-            if (jump||branch) begin
-                pc <= newpc;
-            end;
-        end
+        pc <= pc + 4;
+        if (jump||branch) begin
+            pc <= newpc;
+        end;
+     end
+    always @(posedge nop) begin
+        pc <= pc - 4;
     end
 endmodule
