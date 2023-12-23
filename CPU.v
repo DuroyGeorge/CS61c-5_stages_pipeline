@@ -1,6 +1,7 @@
 module CPU (
     input wire clk
 );
+
     // Pipeline wires
     wire [31:0] _ID_pc;
     wire [31:0] _ID_inst;
@@ -260,6 +261,10 @@ module CPU (
         EX_readData2<=regFile.readData2;
         
         //IF
+        if(stall)begin
+            stall <= 0;
+        end
+        else begin
         ID_pc<=pc_IF;
         ID_inst<=inst_IF;
         ID_funct7<=funct7_IF;
@@ -268,7 +273,7 @@ module CPU (
         ID_funct3<=funct3_IF;
         ID_rd<=rd_IF;
         ID_opcode<=opcode_IF;
-        // end
+        end
 
         //ID
         EX_pc<=ID_pc;
@@ -354,21 +359,8 @@ module CPU (
 
         //MEM
 
-        //conditional branch
+        //branch
         if(MEM_branch||MEM_jump)begin
-                MEM_pc<=0;
-                MEM_inst<=0;
-                MEM_rd<=0;
-                MEM_opcode<=0;
-                MEM_load<=0;
-                MEM_store<=0;
-                MEM_jump<=0;
-                MEM_readData1<=0;
-                MEM_readData2<=0;
-                MEM_result<=0;
-                MEM_writedata<=0;
-                MEM_branch<=0; 
-
                 EX_pc<=0;
                 EX_inst<=0;
                 EX_rs2<=0;
@@ -391,6 +383,7 @@ module CPU (
                 ID_rd<=0;
                 ID_opcode<=0;
 
+                stall<=1;
         end
 
         WB_inst<=MEM_inst;

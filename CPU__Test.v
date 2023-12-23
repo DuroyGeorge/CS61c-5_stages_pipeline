@@ -20,7 +20,7 @@ module tb_CPU;
   initial begin
     // Initialize signals
     clk = 0;
-    #500 $finish;
+    #200 $finish;
   end
 
 endmodule
