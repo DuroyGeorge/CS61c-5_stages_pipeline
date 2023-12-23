@@ -246,7 +246,7 @@ module CPU (
     end
 
     assign _EX_operand1=(EX_opcode==7'b0110011||EX_opcode==7'b0010011||EX_opcode==7'b0000011||EX_opcode==7'b0100011)?EX_readData1:((EX_opcode==7'b1101111||EX_opcode==7'b1100011)?EX_pc:32'b0);
-    assign _EX_operand2=(EX_opcode==7'b0110011)?EX_readData2:((EX_opcode==7'b0000011||EX_opcode==7'b0100011||EX_opcode==7'b0010011||EX_opcode==7'b1100011)?$signed({{20{EX_immediateValue_12[11]}},EX_immediateValue_12}):((EX_opcode==7'b1101111)?$signed({{12{EX_immediateValue_20[19]}},EX_immediateValue_20}):32'b0));
+    assign _EX_operand2=(EX_opcode==7'b0110011)?EX_readData2:((EX_opcode==7'b0000011||EX_opcode==7'b0100011||EX_opcode==7'b0010011)?$signed({{20{EX_immediateValue_12[11]}},EX_immediateValue_12}):(EX_opcode==7'b1100011)?$signed({{20{EX_immediateValue_12[11]}},EX_immediateValue_12})*2:(EX_opcode==7'b1101111)?$signed({{12{EX_immediateValue_20[19]}},EX_immediateValue_20})*2:32'b0);
     assign _WB_writedata=(WB_opcode==7'b0110011||WB_opcode==7'b0010011)?WB_result:((WB_opcode==7'b0000011)?WB_memreadData:((WB_opcode==7'b1101111)?WB_writedata:32'b0));
 
     always @(posedge clk) begin
