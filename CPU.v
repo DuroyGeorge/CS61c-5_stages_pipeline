@@ -260,10 +260,6 @@ module CPU (
         EX_readData2<=regFile.readData2;
         
         //IF
-        // if(stall)begin
-        //     stall<=0;
-        // end
-        // else begin
         ID_pc<=pc_IF;
         ID_inst<=inst_IF;
         ID_funct7<=funct7_IF;
@@ -311,8 +307,7 @@ module CPU (
                 ID_funct3<=0;
                 ID_rd<=0;
                 ID_opcode<=0;
-                nop=1;
-                // stall=1;
+                nop<=1;
             end
         end
         else if(ID_opcode==7'b0010011||ID_opcode==7'b0000011)begin//I load
@@ -332,24 +327,6 @@ module CPU (
                 ID_rd<=0;
                 ID_opcode<=0;
                 nop<=1;
-                // stall=1;               
-
-                // EX_pc<=0;
-                // EX_inst<=0;
-                // EX_rs2<=0;
-                // EX_rs1<=0;
-                // EX_opcode<=0;
-                // EX_rd<=0;
-                // EX_immediateValue_12<=0;
-                // EX_immediateValue_20<=0;
-                // EX_alusel<=0;
-                // EX_jump<=0;
-                // EX_load<=0;
-                // EX_store<=0;
-                // EX_readData1<=0;
-                // EX_readData2<=0;
-                // nop=1;
-                // stall=1;
             end
         end
 
