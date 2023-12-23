@@ -38,10 +38,10 @@ end
                     end
                 end
                 3'b001: begin
-                    alusel=3'b100;
+                    alusel=3'b001;
                 end
                 3'b100: begin
-                    alusel=3'b110;
+                    alusel=3'b100;
                 end
                 3'b101:begin
                     if(funct7==7'b0000000)begin

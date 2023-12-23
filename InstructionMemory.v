@@ -32,15 +32,15 @@ initial begin
     memory[11] <= 8'h00;
 
 
-    memory[12] <= 8'h5B; 
-    memory[13] <= 8'hFD;
-    memory[14] <= 8'h93;
+    memory[12] <= 8'hB3; 
+    memory[13] <= 8'hFE;
+    memory[14] <= 8'h64;
     memory[15] <= 8'h00;
 
 
-    memory[16] <= 8'hB3; 
-    memory[17] <= 8'h12;
-    memory[18] <= 8'h53;
+    memory[16] <= 8'h33; 
+    memory[17] <= 8'h92;
+    memory[18] <= 8'h62;
     memory[19] <= 8'h00;
 end
 
