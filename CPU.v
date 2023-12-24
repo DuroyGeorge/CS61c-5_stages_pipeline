@@ -256,10 +256,10 @@ module CPU (
         end
 
         //register access
-        WB_load=MEM_load;
+        WB_load=MEM_load;       
         EX_readData1<=regFile.readData1;
         EX_readData2<=regFile.readData2;
-        
+
         //IF
         if(stall)begin
             stall <= 0;
@@ -275,6 +275,7 @@ module CPU (
         ID_opcode<=opcode_IF;
         end
 
+
         //ID
         EX_pc<=ID_pc;
         EX_inst<=ID_inst;
@@ -288,53 +289,6 @@ module CPU (
         EX_jump<=jump_ID;
         EX_load<=load_ID;
         EX_store<=store_ID;
-
-        //forwarding
-        if(ID_opcode==7'b0110011||ID_opcode==7'b1100011) begin//R B
-            if(EX_rd==ID_rs1)begin
-                EX_readData1<=alu.result;
-            end
-            if(EX_rd==ID_rs2)begin
-                EX_readData2<=alu.result;
-            end
-            if(MEM_opcode==7'b0000011&&MEM_rd==ID_rs1)begin
-                EX_readData1<=memunit.readData;
-            end
-            if(MEM_opcode==7'b0000011&&MEM_rd==ID_rs2)begin
-                EX_readData2<=memunit.readData;
-            end
-            if(ID_opcode==7'b0000011&&(ID_rd==rs1_IF||ID_rd==rs2_IF))begin
-                ID_pc<=0;
-                ID_inst<=0;
-                ID_funct7<=0;
-                ID_rs2<=0;
-                ID_rs1<=0;
-                ID_funct3<=0;
-                ID_rd<=0;
-                ID_opcode<=0;
-                nop<=1;
-            end
-        end
-        else if(ID_opcode==7'b0010011||ID_opcode==7'b0000011)begin//I load
-            if(EX_rd==ID_rs1)begin
-                EX_readData1<=alu.result;
-            end
-            if(MEM_opcode==7'b0000011&&MEM_rd==ID_rs1)begin
-                EX_readData1<=memunit.readData;
-            end
-            if(ID_opcode==7'b0000011&&ID_rd==rs1_IF)begin
-                ID_pc<=0;
-                ID_inst<=0;
-                ID_funct7<=0;
-                ID_rs2<=0;
-                ID_rs1<=0;
-                ID_funct3<=0;
-                ID_rd<=0;
-                ID_opcode<=0;
-                nop<=1;
-            end
-        end
-
 
         //EX
         MEM_pc<=EX_pc;
@@ -358,6 +312,125 @@ module CPU (
         end
 
         //MEM
+        WB_inst<=MEM_inst;
+        WB_opcode<=MEM_opcode;
+        WB_rd<=MEM_rd;
+        WB_result<=MEM_result;
+        WB_writedata<=MEM_writedata;
+
+        WB_memreadData<=memunit.readData;
+        
+        //WB
+
+        //forwarding
+        if(ID_opcode==7'b0110011||ID_opcode==7'b1100011) begin//R B
+            if(EX_rd==ID_rs1)begin
+                EX_readData1<=alu.result;
+            end
+            if(EX_rd==ID_rs2)begin
+                EX_readData2<=alu.result;
+            end
+            if(MEM_opcode==7'b0000011&&MEM_rd==ID_rs1)begin
+                EX_readData1<=memunit.readData;
+            end
+            if(MEM_opcode==7'b0000011&&MEM_rd==ID_rs2)begin
+                EX_readData2<=memunit.readData;
+            end
+            if(EX_opcode==7'b0000011&&(EX_rd==ID_rs1||EX_rd==ID_rs2))begin
+                WB_inst<=WB_inst;
+                WB_opcode<=WB_opcode;
+                WB_rd<=WB_rd;
+                WB_result<=WB_result;
+                WB_writedata<=WB_writedata;
+                WB_memreadData<=WB_memreadData;
+
+                MEM_pc<=MEM_pc;
+                MEM_inst<=MEM_inst;
+                MEM_opcode<=MEM_opcode;
+                MEM_rd<=MEM_rd;
+                MEM_load<=MEM_load;
+                MEM_store<=MEM_store;
+                MEM_readData1<=MEM_readData1;
+                MEM_readData2<=MEM_readData2;
+                MEM_jump=MEM_jump;
+                MEM_result<=MEM_result;
+
+                EX_pc<=EX_pc;
+                EX_inst<=EX_inst;
+                EX_rs2<=EX_rs2;
+                EX_rs1<=EX_rs1;
+                EX_opcode<=EX_opcode;
+                EX_rd<=EX_rd;
+                EX_immediateValue_12<=EX_immediateValue_12;
+                EX_immediateValue_20<=EX_immediateValue_20;
+                EX_alusel<=EX_alusel;
+                EX_jump<=EX_jump;
+                EX_load<=EX_load;
+                EX_store<=EX_store;
+
+                ID_pc<=0;
+                ID_inst<=0;
+                ID_funct7<=0;
+                ID_rs2<=0;
+                ID_rs1<=0;
+                ID_funct3<=0;
+                ID_rd<=0;
+                ID_opcode<=0;
+
+                nop<=1;
+            end
+        end
+        else if(ID_opcode==7'b0010011||ID_opcode==7'b0000011||ID_opcode==7'b0100011)begin//I load store
+            if(EX_rd==ID_rs1)begin
+                EX_readData1<=alu.result;
+            end
+            if(MEM_opcode==7'b0000011&&MEM_rd==ID_rs1)begin
+                EX_readData1<=memunit.readData;
+            end
+            if(EX_opcode==7'b0000011&&EX_rd==ID_rs1)begin
+                WB_inst<=WB_inst;
+                WB_opcode<=WB_opcode;
+                WB_rd<=WB_rd;
+                WB_result<=WB_result;
+                WB_writedata<=WB_writedata;
+                WB_memreadData<=WB_memreadData;
+
+                MEM_pc<=MEM_pc;
+                MEM_inst<=MEM_inst;
+                MEM_opcode<=MEM_opcode;
+                MEM_rd<=MEM_rd;
+                MEM_load<=MEM_load;
+                MEM_store<=MEM_store;
+                MEM_readData1<=MEM_readData1;
+                MEM_readData2<=MEM_readData2;
+                MEM_jump=MEM_jump;
+                MEM_result<=MEM_result;
+
+                EX_pc<=EX_pc;
+                EX_inst<=EX_inst;
+                EX_rs2<=EX_rs2;
+                EX_rs1<=EX_rs1;
+                EX_opcode<=EX_opcode;
+                EX_rd<=EX_rd;
+                EX_immediateValue_12<=EX_immediateValue_12;
+                EX_immediateValue_20<=EX_immediateValue_20;
+                EX_alusel<=EX_alusel;
+                EX_jump<=EX_jump;
+                EX_load<=EX_load;
+                EX_store<=EX_store;
+
+                ID_pc<=0;
+                ID_inst<=0;
+                ID_funct7<=0;
+                ID_rs2<=0;
+                ID_rs1<=0;
+                ID_funct3<=0;
+                ID_rd<=0;
+                ID_opcode<=0;
+
+                nop<=1;
+            end
+        end
 
         //branch
         if(MEM_branch||MEM_jump)begin
@@ -385,16 +458,5 @@ module CPU (
 
                 stall<=1;
         end
-
-        WB_inst<=MEM_inst;
-        WB_opcode<=MEM_opcode;
-        WB_rd<=MEM_rd;
-        WB_result<=MEM_result;
-        WB_writedata<=MEM_writedata;
-
-        WB_memreadData<=memunit.readData;
-        
-        //WB
-        
     end
 endmodule

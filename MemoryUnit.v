@@ -3,7 +3,6 @@ module MemoryUnit (
     input wire [31:0] address,
     input wire [31:0] writeData,
     input wire memWrite, // Signal indicating a memory write operation
-    input wire nop,
     output wire [31:0] readData
 );
 

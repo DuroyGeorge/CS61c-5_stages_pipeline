@@ -2,9 +2,7 @@ module InstructionMemory (
     input wire [31:0] address,
     output wire [31:0] instruction
 );
-
     reg [7:0] memory [0:1023]; // Assuming 1024 words of 32-bit instructions
-
     // Initial instructions (replace with actual instructions)
     integer i;
 initial begin
@@ -12,13 +10,12 @@ initial begin
     for (i = 0; i < 1024; i = i + 1) begin
         memory[i] = 8'b0;
     end
-
-    // Add instructions
+    // Add
     memory[0] <= 8'h33; 
     memory[1] <= 8'h84;
-    memory[2] <= 8'hA2;
+    memory[2] <= 8'h62;
     memory[3] <= 8'h00;
-    
+    //0000000 00110
     // LW
     memory[4] <= 8'h83; 
     memory[5] <= 8'h24;

@@ -16,6 +16,6 @@ end
         end;
      end
     always @(posedge nop) begin
-        pc <= pc - 4;
+        pc <= pc - 8;
     end
 endmodule
