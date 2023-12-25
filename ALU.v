@@ -8,7 +8,7 @@ module ALU (
 always @* begin
     case (alusel)
         3'b000: result = operand1 + operand2; // ADD
-        3'b010: result = operand1 - operand2; // SUB
+        3'b010: result = $signed(operand1) - operand2; // SUB
         3'b101: result = operand1 >>> operand2[4:0]; // SRL
         3'b011: result = $signed(operand1) >>> operand2[4:0]; // SRA (with sign extension)
         3'b001: result = operand1 << operand2[4:0]; // SLL

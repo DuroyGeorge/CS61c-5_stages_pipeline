@@ -52,10 +52,10 @@ initial begin
     memory[27] <= 8'h00;
 
     // sub
-    memory[28] <= 8'h23;
+    memory[28] <= 8'h33;
     memory[29] <= 8'h03;
     memory[30] <= 8'h44;
-    memory[31] <= 8'h00;
+    memory[31] <= 8'h40;
 
     //xor
     memory[32] <= 8'hA3;
@@ -70,10 +70,10 @@ initial begin
     memory[39] <= 8'h00;
 
     //sub
-    memory[54] <= 8'h23;
+    memory[54] <= 8'h33;
     memory[55] <= 8'h03;
     memory[56] <= 8'h44;
-    memory[57] <= 8'h00;
+    memory[57] <= 8'h40;
 
     //xor
     memory[58] <= 8'hA3;
