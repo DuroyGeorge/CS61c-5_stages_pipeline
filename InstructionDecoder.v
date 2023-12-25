@@ -15,6 +15,4 @@ module InstructionDecoder (
     assign funct3 = instruction[14:12];
     assign rd = instruction[11:7];
     assign opcode = instruction[6:0];
-    // Decode control signals
-   
 endmodule

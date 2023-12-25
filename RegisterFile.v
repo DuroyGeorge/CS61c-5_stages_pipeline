@@ -20,7 +20,6 @@ module RegisterFile(
     assign readData2 = registers[readReg2];
 
     always @(posedge clk) begin
-        // Write data to registers when writeEnable is asserted
         if (writeEnable) begin
             registers[writeReg] = writeData;
         end

@@ -21,7 +21,6 @@ initial begin
     immediateValue_12=12'b0;
     immediateValue_20=12'b0;
 end
-    // ALU operation mapping
     always @* begin
         case (opcode) 
         7'b0110011: begin // R-type instructions
@@ -93,7 +92,7 @@ end
         end
         7'b1101111: begin // J-type instructions (Jump)
             jump = 1; 
-            immediateValue_20={instruction[31],instruction[19:12],instruction[20],instruction[30:21]};immediateValue_12=12'b0; // j
+            immediateValue_20={instruction[31],instruction[19:12],instruction[20],instruction[30:21]};immediateValue_12=12'b0; // jal
             load=1;store=0;
             alusel=3'b0;
         end

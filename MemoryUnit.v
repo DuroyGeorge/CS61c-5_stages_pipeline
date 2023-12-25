@@ -2,11 +2,11 @@ module MemoryUnit (
     input wire clk,
     input wire [31:0] address,
     input wire [31:0] writeData,
-    input wire memWrite, // Signal indicating a memory write operation
+    input wire memWrite, 
     output wire [31:0] readData
 );
 
-    reg [7:0] memory [0:1023]; // Example memory with 1024 locations
+    reg [7:0] memory [0:1023]; 
     integer i;
     initial begin
         // Reset memory to initial state
@@ -16,7 +16,6 @@ module MemoryUnit (
     end
     assign readData = {memory[address+3],memory[address+2],memory[address+1],memory[address]};
     always @(posedge clk) begin
-            // Memory write operation
             if (memWrite) begin
                 memory[address] <= writeData[7:0];
                 memory[address+1]<=writeData[15:8];
